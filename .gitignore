@@ -1,0 +1,9 @@
+client_secret**.json
+
+logs
+config**.yml
+
+.venv
+.idea
+
+**/.DS_Store
