@@ -14,4 +14,3 @@ def get_by_userid(db: Session, user_id: int):
 
 def add(db: Session, auth_methods: AuthMethods):
     db.add(auth_methods)
-    db.flush()

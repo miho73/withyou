@@ -86,6 +86,8 @@ def callback_signin_kakao(request: Request, db: Session = Depends(create_connect
         return RedirectResponse("/auth/signin?error=code_unset", 302)
 
     jwt = complete_oauth_flow(code, db)
+    db.commit()
+
     response = RedirectResponse("/auth/signin/complete?jwt={jwt}".format(jwt=jwt), 302)
     response.delete_cookie('with-state')
 

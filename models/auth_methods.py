@@ -25,3 +25,4 @@ class AuthMethods(Base):
     user = relationship("User", back_populates="auth_methods")
 
     google_method = relationship("GoogleMethod", back_populates="auth_methods", uselist=False)
+    password_method = relationship("PasswordMethod", back_populates="auth_methods", uselist=False)

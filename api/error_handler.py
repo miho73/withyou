@@ -1,5 +1,10 @@
+from types import TracebackType
+
+from anyio import value
 from fastapi import HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.routing import Request
+from pydantic import ValidationError
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -43,6 +48,16 @@ def http_exception_handler(request: Request, exc: HTTPException):
 
     return response
 
+def http_value_error_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "code": 400,
+            "state": "Bad Request",
+            "message": str(exc)
+        }
+    )
+
 def http_unauthorized_handler(request: Request, exc):
     return JSONResponse(
         status_code=401,
@@ -51,6 +66,30 @@ def http_unauthorized_handler(request: Request, exc):
             "code": 401,
             "state": "Unauthorized",
             "message": "You are not authorized to access this resource"
+        }
+    )
+
+def http_validation_error_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "code": 400,
+            "state": "Bad Request",
+            "message": str(exc)
+        }
+    )
+
+def http_request_validation_error_handler(request: Request, exc: RequestValidationError):
+    errors = {
+        err['loc'][-1]: err['msg'] for err in exc.errors()
+    }
+
+    return JSONResponse(
+        status_code=400,
+        content={
+            "code": 400,
+            "state": "Bad Request",
+            "fails": errors
         }
     )
 
@@ -76,6 +115,9 @@ def http_not_found_handler(request: Request, exc):
 
 def add_error_handler(app):
     app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(ValueError, http_value_error_handler)
+    app.add_exception_handler(ValidationError, http_validation_error_handler)
+    app.add_exception_handler(RequestValidationError, http_request_validation_error_handler)
     app.add_exception_handler(HTTP_500_INTERNAL_SERVER_ERROR, http_internal_server_error_handler)
     app.add_exception_handler(HTTP_404_NOT_FOUND, http_not_found_handler)
     return app

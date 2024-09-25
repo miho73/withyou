@@ -45,7 +45,7 @@ def complete_oauth_flow(code: str, db: Session):
             email_verified = google_user.email_verified,
             role = Role.ROLE_USER.value
         )
-        user = user_service.add_user(user, OAuthMethods.GOOGLE, google_user.id, db)
+        user = user_service.add_user(user, OAuthMethods.GOOGLE, {'google_id': google_user.id}, db)
 
     jwt_token = jwt.create_token(user.uid, user.role)
     return jwt_token

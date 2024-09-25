@@ -8,8 +8,8 @@ from sql.database import Base
 
 
 class Role(Enum):
-    ROLE_USER = "USER"
-    ROLE_ADMIN = "ADMIN"
+    ROLE_USER  = "USER   "
+    ROLE_ADMIN = "ADMIN  "
 
 class User(Base):
     __tablename__ = "users"
@@ -21,6 +21,7 @@ class User(Base):
     join_date = Column(TIMESTAMP, nullable=False, default="now()")
     last_login = Column(TIMESTAMP)
 
+    sex = Column(CHAR, nullable=False, default="N")
     email = Column(VARCHAR, nullable=False, unique=True)
     email_verified = Column(BOOLEAN, nullable=False, default=False)
     role:Role = Column(CHAR, nullable=False, default="USER")
