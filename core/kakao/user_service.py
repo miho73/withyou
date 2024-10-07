@@ -1,7 +1,7 @@
 import httpx
 
 from config import config
-from models.user import KakaoUser
+from schemas.user import KakaoUser
 
 def get_user(access_token) -> KakaoUser:
     with httpx.Client() as cli:

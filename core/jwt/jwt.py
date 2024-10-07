@@ -4,13 +4,14 @@ import jwt
 from jwt import InvalidTokenError
 
 from config import config
+from models.user import Role
 
 DB_ROLE_CODE_TO_ROLE = {
-    'USER   ': ['with:user'],
-    'ADMIN  ': ['with:user', 'with:admin']
+    'USER': ['with:user'],
+    'ADMIN': ['with:user', 'with:admin']
 }
 
-def create_token(user_id: int, role: str) -> str:
+def create_token(user_id: int, role: Role) -> str:
     payload = {
         'aud': DB_ROLE_CODE_TO_ROLE[role],
         'sub': user_id,

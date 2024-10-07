@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Security
 from starlette.responses import JSONResponse
@@ -10,6 +12,8 @@ route = APIRouter(
     prefix="/api/auth",
     tags=["authentication"],
 )
+
+log = logging.getLogger(__name__)
 
 @router.post(
     path = "/authorization",
@@ -71,6 +75,7 @@ route = APIRouter(
     }
 )
 def authorize_user(auth: str = Security(oauth_schema)):
+    log.debug("Authorizing user with JWT token. jwt: {token}".format(token = auth))
     authorize_jwt(auth)
 
     return JSONResponse(

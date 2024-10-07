@@ -17,3 +17,4 @@ def select_by_id(db: Session, google_id: str) -> Union[GoogleMethod, None]:
 def add(db: Session, auid: int, google_id: str):
     new_google_method = GoogleMethod(auid=auid, google_id=google_id)
     db.add(new_google_method)
+    db.flush()

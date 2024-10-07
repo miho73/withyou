@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.params import Depends, Security
 from sqlalchemy.orm import Session
@@ -11,7 +13,7 @@ from core.user_service import user_service
 from models import User
 from schemas.request_models.user_requests import AddUserRequest
 from models.user import Role
-from schemas.user import UserSchema
+from schemas.user import UserSchema, JwtUser
 from sql.database import create_connection
 from sql.repository import user_repository, password_method_repository
 
@@ -20,23 +22,28 @@ router = APIRouter(
     tags=["user"]
 )
 
-def get_active_user(db: Session = Depends(create_connection), authorization: str = Depends(oauth_schema)) -> UserSchema:
+log = logging.getLogger(__name__)
+
+def get_active_user(db: Session = Depends(create_connection), authorization: str = Depends(oauth_schema)) -> JwtUser:
+    log.debug("Getting user information upon JWT. jwt=\"{}\"".format(authorization))
     token = authorize_jwt(authorization)
 
     sub = token.get("sub")
 
     user = user_repository.get_user_by_uid(db, sub)
     if user is None:
+        log.debug("User specified by JWT was not found. user_uid=\"{}\"".format(sub))
         raise HTTPException(status_code=400, detail="User not found")
 
-    user_schema = UserSchema(
+    log.debug("User information retrieved. user=\"{}\", ".format(user.role))
+    jwt_user = JwtUser(
         uid=user.uid,
         uname=user.uname,
         email=user.email,
         email_verified=user.email_verified,
         role=user.role
     )
-    return user_schema
+    return jwt_user
 
 
 @router.get(
@@ -99,7 +106,8 @@ def get_active_user(db: Session = Depends(create_connection), authorization: str
         }
     }
 )
-def get_user(user: UserSchema = Security(get_active_user)):
+def get_user(user: JwtUser = Security(get_active_user)):
+    log.debug("Responding user information. user_uid=\"{}\"".format(user.uid))
     return JSONResponse(
         content={
             "code": 200,
@@ -109,7 +117,7 @@ def get_user(user: UserSchema = Security(get_active_user)):
                 "uname": user.uname,
                 "email": user.email,
                 "email_verified": user.email_verified,
-                "role": user.role
+                "role": str(user.role)
             }
         }
     )
@@ -133,8 +141,10 @@ def get_user(user: UserSchema = Security(get_active_user)):
     }
 )
 def add_user(user_body: AddUserRequest, request: Request, db: Session = Depends(create_connection)):
+    log.debug("Adding new user. user_id=\"{}\", email=\"{}\"".format(user_body.id, user_body.email))
     recaptcha = verify_recaptcha(user_body.recaptcha, request.client.host, "signup")
     if not recaptcha:
+        log.debug("Recaptcha verification failed and signup was canceled. user_id=\"{}\"".format(user_body.id))
         return JSONResponse(
             content={
                 "code": 400,
@@ -152,7 +162,7 @@ def add_user(user_body: AddUserRequest, request: Request, db: Session = Depends(
         sex = user_body.sex
     )
 
-    user = user_service.add_user(
+    user_service.add_user(
         user,
         OAuthMethods.PASSWORD,
         {
@@ -163,6 +173,7 @@ def add_user(user_body: AddUserRequest, request: Request, db: Session = Depends(
     )
     db.commit()
 
+    log.debug("User added successfully. user_id=\"{}\"".format(user_body.id))
     return JSONResponse(
         content={
             "code": 200,
@@ -188,7 +199,7 @@ def add_user(user_body: AddUserRequest, request: Request, db: Session = Depends(
         },
     }
 )
-def checkUserId(request: Request, db: Session = Depends(create_connection)):
+def check_user_id(request: Request, db: Session = Depends(create_connection)):
     id = request.query_params.get("id")
     if id is None:
         return JSONResponse(

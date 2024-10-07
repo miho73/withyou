@@ -15,4 +15,5 @@ def exists_by_userid(db: Session, userid: str) -> bool:
 def add(db: Session, auid: int, userid: str, password: str):
     new_password_method = PasswordMethod(auid=auid, userid=userid, password=password)
     db.add(new_password_method)
+    db.flush()
 

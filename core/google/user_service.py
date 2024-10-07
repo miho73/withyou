@@ -1,17 +1,23 @@
+import logging
+
 from googleapiclient.discovery import build
 
-from models.user import GoogleUser
+from models.user import Role
+from schemas.user import GoogleUser
 
+log = logging.getLogger(__name__)
 
 def get_user(credential) -> GoogleUser:
     with build(serviceName='oauth2', version='v2', credentials=credential) as service:
         profile = service.userinfo().get().execute()
 
-        google_user = GoogleUser()
-        google_user.uname = profile['name']
-        google_user.email = profile['email']
-        google_user.email_verified = profile['verified_email']
-        google_user.id = profile['id']
-        google_user.picture = profile['picture']
+        log.debug("Got user profile from Google. profile=\"{profile}\"".format(profile=profile))
+        google_user = GoogleUser(
+            uname = profile['name'],
+            email = profile['email'],
+            email_verified = profile['verified_email'],
+            id = profile['id'],
+            picture = profile['picture']
+        )
 
         return google_user

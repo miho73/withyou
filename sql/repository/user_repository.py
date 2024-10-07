@@ -14,3 +14,4 @@ def get_user_by_uid(db: Session, uid: int):
 
 def add(db: Session, user: User):
     db.add(user)
+    db.flush()

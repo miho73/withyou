@@ -14,7 +14,7 @@ SQL_DATABASE_URL = "postgresql://{user}:{password}@{host}:{port}/{name}".format(
 
 engine = create_engine(SQL_DATABASE_URL)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 Base = declarative_base()
 
 def create_connection():

@@ -1,12 +1,13 @@
-from types import TracebackType
+import logging
 
-from anyio import value
 from fastapi import HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import Request
 from pydantic import ValidationError
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+
+log = logging.getLogger(__name__)
 
 HTTP_CODE_TO_STATE = {
     200: "OK",
@@ -34,6 +35,7 @@ HTTP_CODE_TO_STATE = {
 }
 
 def http_exception_handler(request: Request, exc: HTTPException):
+    log.error("HTTPException: status_code={}, detail={}".format(exc.status_code, exc.detail))
     response = JSONResponse(
         status_code=exc.status_code,
         content={
@@ -49,16 +51,18 @@ def http_exception_handler(request: Request, exc: HTTPException):
     return response
 
 def http_value_error_handler(request: Request, exc: ValueError):
+    log.error("ValueError: {}".format(exc))
     return JSONResponse(
         status_code=400,
         content={
             "code": 400,
             "state": "Bad Request",
-            "message": str(exc)
+            "message": "value error"
         }
     )
 
 def http_unauthorized_handler(request: Request, exc):
+    log.warning("Unauthorized: {}".format(exc))
     return JSONResponse(
         status_code=401,
         headers={"WWW-Authenticate": "Bearer"},
@@ -70,16 +74,18 @@ def http_unauthorized_handler(request: Request, exc):
     )
 
 def http_validation_error_handler(request: Request, exc: ValueError):
+    log.error("ValidationError: {}".format(exc))
     return JSONResponse(
         status_code=400,
         content={
             "code": 400,
             "state": "Bad Request",
-            "message": str(exc)
+            "message": "validation error"
         }
     )
 
 def http_request_validation_error_handler(request: Request, exc: RequestValidationError):
+    log.warning("RequestValidationError: {}".format(exc))
     errors = {
         err['loc'][-1]: err['msg'] for err in exc.errors()
     }
@@ -94,6 +100,7 @@ def http_request_validation_error_handler(request: Request, exc: RequestValidati
     )
 
 def http_internal_server_error_handler(request: Request, exc):
+    log.error("Internal Server Error: {}".format(exc))
     return JSONResponse(
         status_code=500,
         content={
@@ -104,6 +111,7 @@ def http_internal_server_error_handler(request: Request, exc):
     )
 
 def http_not_found_handler(request: Request, exc):
+    log.warning("Not Found: {}".format(exc))
     return JSONResponse(
         status_code=404,
         content={
@@ -114,6 +122,7 @@ def http_not_found_handler(request: Request, exc):
     )
 
 def add_error_handler(app):
+    log.info("Adding error handlers")
     app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(ValueError, http_value_error_handler)
     app.add_exception_handler(ValidationError, http_validation_error_handler)
