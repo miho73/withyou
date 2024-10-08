@@ -70,7 +70,7 @@ def complete_oauth_flow(code: str, db: Session):
             uname = kakao_user.uname,
             email = kakao_user.email,
             email_verified = kakao_user.email_verified,
-            role = Role.ROLE_USER.value
+            role = Role.USER.value
         )
         user = user_service.add_user(user, OAuthMethods.GOOGLE, kakao_user.id, db)
 

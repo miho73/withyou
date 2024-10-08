@@ -1,5 +1,6 @@
 from enum import Enum
 
+import sqlalchemy.dialects.postgresql
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import TIMESTAMP, INTEGER, VARCHAR, BOOLEAN, CHAR
 from sqlalchemy.orm import relationship
@@ -8,8 +9,8 @@ from sql.database import Base
 
 
 class Role(Enum):
-    ROLE_USER = "USER"
-    ROLE_ADMIN = "ADMIN"
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 class User(Base):
     __tablename__ = "users"
@@ -24,6 +25,6 @@ class User(Base):
     sex = Column(CHAR, nullable=False, default="N")
     email = Column(VARCHAR, nullable=False, unique=True)
     email_verified = Column(BOOLEAN, nullable=False, default=False)
-    role: Role = Column(VARCHAR, nullable=False, default=Role.ROLE_USER)
+    role = Column(sqlalchemy.dialects.postgresql.ENUM(Role), nullable=False, default=Role.USER)
 
     auth_methods = relationship("AuthMethods", back_populates="user", uselist=False)

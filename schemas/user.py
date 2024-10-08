@@ -11,7 +11,7 @@ class UserSchema(BaseModel):
     uname: str
     email: str
     email_verified: bool
-    role: str = Role.ROLE_USER
+    role: Role = Role.USER
     sex: str = 'N'
 
     @field_validator("email", mode="before")
@@ -33,7 +33,7 @@ class UserSchema(BaseModel):
     @field_validator("role", mode="before")
     @classmethod
     def validate_role(cls, value):
-        if str(value) not in ["USER", "ADMIN"]:
+        if value.value not in ["USER", "ADMIN"]:
             raise ValueError("Role must be one of 'USER' or 'ADMIN'")
         return value
 
@@ -82,6 +82,6 @@ class JwtUser(BaseModel):
     @field_validator("role", mode="before")
     @classmethod
     def validate_role(cls, value):
-        if str(value) not in ["USER", "ADMIN"]:
+        if value.value not in ["USER", "ADMIN"]:
             raise ValueError("Role must be one of 'USER' or 'ADMIN'")
         return value

@@ -1,11 +1,11 @@
-from typing import Union
+from typing import Union, Optional
 
 from sqlalchemy.orm import Session
 
 from models.google_method import GoogleMethod
 
 
-def select_by_id(db: Session, google_id: str) -> Union[GoogleMethod, None]:
+def select_by_id(db: Session, google_id: str) -> Optional[GoogleMethod]:
     return (
         db.query(GoogleMethod)
         .filter(

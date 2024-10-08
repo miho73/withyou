@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse
 from api.authentication.authorization import oauth_schema
 from core.authentication.auth_methods_service import OAuthMethods
 from core.authentication.authorization import authorize_jwt
+from core.cryptography.brypt import hash_bcrypt
 from core.google.recaptcha import verify_recaptcha
 from core.user_service import user_service
 from models import User
@@ -117,7 +118,7 @@ def get_user(user: JwtUser = Security(get_active_user)):
                 "uname": user.uname,
                 "email": user.email,
                 "email_verified": user.email_verified,
-                "role": str(user.role)
+                "role": user.role.value
             }
         }
     )
@@ -158,7 +159,7 @@ def add_user(user_body: AddUserRequest, request: Request, db: Session = Depends(
         uname = user_body.name,
         email = user_body.email,
         email_verified = False,
-        role = Role.ROLE_USER.value,
+        role = Role.USER.value,
         sex = user_body.sex
     )
 
@@ -167,7 +168,7 @@ def add_user(user_body: AddUserRequest, request: Request, db: Session = Depends(
         OAuthMethods.PASSWORD,
         {
             'user_id': user_body.id,
-            'password': user_body.password
+            'password': hash_bcrypt(user_body.password)
         },
         db
     )

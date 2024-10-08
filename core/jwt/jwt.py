@@ -7,8 +7,8 @@ from config import config
 from models.user import Role
 
 DB_ROLE_CODE_TO_ROLE = {
-    'USER': ['with:user'],
-    'ADMIN': ['with:user', 'with:admin']
+    Role.USER: ['with:user'],
+    Role.ADMIN: ['with:user', 'with:admin']
 }
 
 def create_token(user_id: int, role: Role) -> str:

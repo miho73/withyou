@@ -1,4 +1,5 @@
 import logging
+from symbol import pass_stmt
 
 import uvicorn
 from fastapi import FastAPI
@@ -12,7 +13,7 @@ app = FastAPI(
     redoc_url="/api/redoc",
 )
 
-from api.authentication import google_signin, authorization, kakao_signin
+from api.authentication import google_signin, authorization, kakao_signin, password_signin
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ log.info("Starting server")
 log.info("Adding authentication routers")
 app.include_router(google_signin.router)
 app.include_router(kakao_signin.router)
+app.include_router(password_signin.router)
 app.include_router(authorization.router)
 
 # #user

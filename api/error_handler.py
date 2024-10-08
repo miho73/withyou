@@ -7,6 +7,8 @@ from pydantic import ValidationError
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
+from core.password.user_service import AuthError
+
 log = logging.getLogger(__name__)
 
 HTTP_CODE_TO_STATE = {
@@ -121,6 +123,18 @@ def http_not_found_handler(request: Request, exc):
         }
     )
 
+def http_auth_error_handler(request: Request, exc):
+    log.error("AuthError: {}".format(exc))
+    return JSONResponse(
+        status_code=200,
+        content={
+            "code": 200,
+            "state": "OK",
+            "result": "fail",
+            "message": exc.message,
+        }
+    )
+
 def add_error_handler(app):
     log.info("Adding error handlers")
     app.add_exception_handler(HTTPException, http_exception_handler)
@@ -129,4 +143,5 @@ def add_error_handler(app):
     app.add_exception_handler(RequestValidationError, http_request_validation_error_handler)
     app.add_exception_handler(HTTP_500_INTERNAL_SERVER_ERROR, http_internal_server_error_handler)
     app.add_exception_handler(HTTP_404_NOT_FOUND, http_not_found_handler)
+    app.add_exception_handler(AuthError, http_auth_error_handler)
     return app
