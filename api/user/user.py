@@ -228,3 +228,56 @@ def check_user_id(request: Request, db: Session = Depends(create_connection)):
             "result": "available"
         }
     )
+
+@router.get(
+    path='/get/last_login',
+    summary='Get last login time',
+    description='Get last login time of the user in ISO 8601 format. If user have not logged in yet, it will return null.',
+    responses={
+        200: {
+            "description": "Last login time",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "code": 200,
+                        "state": "OK",
+                        "last_login": "2021-01-01T00:00:00"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "User not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "code": 400,
+                        "state": "Bad Request",
+                        "message": "User not found"
+                    }
+                }
+            }
+        }
+    }
+)
+def get_last_login(user: JwtUser = Security(get_active_user), db: Session = Depends(create_connection)):
+    log.debug("Getting last login time. user_id=\"{}\"".format(user.uid))
+    last_login = user_service.get_last_login(db, user.uid)
+    if last_login is None:
+        log.debug("User have not logged in yet. user_id=\"{}\"".format(user.uid))
+        return JSONResponse(
+            content={
+                "code": 200,
+                "state": "OK",
+                "last_login": None
+            }
+        )
+
+    log.debug("Last login time retrieved. user_id=\"{}\", last_login=\"{}\"".format(user.uid, last_login))
+    return JSONResponse(
+        content={
+            "code": 200,
+            "state": "OK",
+            "last_login": last_login.isoformat()
+        }
+    )

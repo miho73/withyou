@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
@@ -37,3 +38,10 @@ def add_user(user: User, auth_method: OAuthMethods, per_oauth_object:dict, db: S
         raise ValueError("Invalid auth method")
 
     return user
+
+
+def get_last_login(db: Session, uid: int) -> datetime:
+    user: User = user_repository.get_user_by_uid(db, uid)
+    log.debug("User information queried. uid=\"{}\"".format(user.uid))
+
+    return user.last_login

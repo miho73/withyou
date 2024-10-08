@@ -6,7 +6,6 @@ from starlette.responses import JSONResponse
 
 from api.authentication.google_signin import router
 from core.authentication.authorization import oauth_schema, authorize_jwt
-from core.jwt import jwt
 
 route = APIRouter(
     prefix="/api/auth",

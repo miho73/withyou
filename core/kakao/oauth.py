@@ -1,5 +1,6 @@
 import random
 import string
+from datetime import datetime
 
 import httpx
 from fastapi import HTTPException
@@ -73,6 +74,8 @@ def complete_oauth_flow(code: str, db: Session):
             role = Role.USER.value
         )
         user = user_service.add_user(user, OAuthMethods.GOOGLE, kakao_user.id, db)
+    else:
+        user.last_login = datetime.now()
 
     jwt_token = jwt.create_token(user.uid, user.role)
     return jwt_token

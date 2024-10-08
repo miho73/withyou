@@ -94,6 +94,8 @@ def signin_password(user_body: PasswordSignInRequest, request: Request, db: Sess
 
     user: UserSchema = password.user_service.authenticate_user(user_body.id, user_body.password, db)
     jwt_token = jwt.create_token(user.uid, user.role)
+
+    db.commit()
     return JSONResponse(
         content={
             "code": 200,

@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from platform import uname
 from typing import Optional
 
@@ -26,6 +27,8 @@ def authenticate_user(username: str, password: str, db: Session) -> UserSchema:
         raise AuthError("invalid-credentials")
 
     user: User = password_method.auth_methods.user
+    user.last_login = datetime.now()
+
     return UserSchema(
         uid=user.uid,
         uname=user.uname,

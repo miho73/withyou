@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from google_auth_oauthlib.flow import Flow
 from sqlalchemy.orm import Session
@@ -50,6 +51,7 @@ def complete_oauth_flow(code: str, db: Session):
         user = user_service.add_user(user, OAuthMethods.GOOGLE, {'google_id': google_user.id}, db)
     else:
         log.debug("Google user found. google_id=\"{google_id}\", email=\"{email}\"".format(google_id=google_user.id, email=google_user.email))
+        user.last_login = datetime.now()
 
     jwt_token = jwt.create_token(user.uid, user.role)
     return jwt_token
