@@ -19,7 +19,7 @@ class UserSchema(BaseModel):
     def validate(cls, value):
         if len(value) < 5 or len(value) > 255:
             raise ValueError("Email must be 5 to 255 characters long")
-        if not re.match(r'^[-\w.]+@([-\w]+.)+[-\w]{2,4}$', value):
+        if not re.match(r'^[-\w.]+@([-\w]+\.)+[-\w]{2,4}$', value):
             raise ValueError("Email regex check failed")
         return value
 
@@ -68,7 +68,7 @@ class JwtUser(BaseModel):
     def validate(cls, value):
         if len(value) < 5 or len(value) > 255:
             raise ValueError("Email must be 5 to 255 characters long")
-        if not re.match(r'^[-\w.]+@([-\w]+.)+[-\w]{2,4}$', value):
+        if not re.match(r'^[-\w.]+@([-\w]+\.)+[-\w]{2,4}$', value):
             raise ValueError("Email regex check failed")
         return value
 
